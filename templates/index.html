@@ -15,6 +15,7 @@
 
     <script>
         function handleSubmit() {
+            // TODO: fix that shit window.external.invoke works in win, but ubuntu suck
             window.webkit.messageHandlers.external.postMessage('user_accept_policy');
         }
         function handleReject() {
