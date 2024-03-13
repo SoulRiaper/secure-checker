@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+    <h1>Привет, {{user}}</h1>
+    <h2>Вам необходимо ознакомится с политикой безопасности!</h2>
+    <div class="">{{policy_text}}</div>
+    <div class="buttons">
+        <button onclick="handleSubmit()">Я принимаю политики безопасности</button>
+        <button onclick="handleReject()">Отказываюсь</button>
+    </div>
+
+    <script>
+        function handleSubmit() {
+            window.webkit.messageHandlers.external.postMessage('user_accept_policy');
+        }
+        function handleReject() {
+            window.webkit.messageHandlers.external.postMessage('user_reject_policy');
+        }
+    </script>
+</body>
+</html>
