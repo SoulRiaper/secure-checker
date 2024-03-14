@@ -31,8 +31,8 @@ pub mod veda_client {
             }
         }
 
-        pub async fn authenticate(&mut self, login: &str, pass: &str) -> Result<(), Error> {
-            let res = default_api::authenticate_get(&self.conf, login, pass, None).await;
+        pub fn authenticate(&mut self, login: &str, pass: &str) -> Result<(), Error> {
+            let res = default_api::authenticate_get(&self.conf, login, pass, None);
 
             match res {
                 Ok(res) => {
@@ -55,8 +55,8 @@ pub mod veda_client {
             &self.user
         }
 
-        pub async fn get_individual_by_uri(&self, uri: &str) -> Option<String> {
-            match default_api::get_individual(&self.conf, &self.auth_ticket, uri, None).await {
+        pub fn get_individual_by_uri(&self, uri: &str) -> Option<String> {
+            match default_api::get_individual(&self.conf, &self.auth_ticket, uri, None) {
                 Ok(json) => {
                     Some(json.to_string())
                 }
@@ -66,12 +66,12 @@ pub mod veda_client {
             }
         }
 
-        pub async fn put_policy_data(&self, username: String, date: String) {
-            let acceptance_uri = format!("cs:{}_pf", self.get_username_hash(username.clone()));
+        pub fn put_policy_data(&self, username: String, date: String) {
+            let acceptance_uri = format!("d:{}_pf", self.get_username_hash(username.clone()));
             let req_json = serde_json::json!({
                 "@": acceptance_uri,
-                "rdf:type":[{"data":"cs:SecurityPolicy","type":"Uri"}],
-                "cs:familiarizedUser": [
+                "rdf:type":[{"data":"v-s:SecurityPolicy","type":"Uri"}],
+                "v-s:familiarizedUser": [
                     {
                       "data": username,
                       "type": "String"
@@ -81,7 +81,7 @@ pub mod veda_client {
 
             let req: PutIndividualRequest = PutIndividualRequest::new(self.auth_ticket.to_string().clone(), req_json);
             println!("ticket: {} add new acceptance uri: {}",req.ticket,  acceptance_uri);
-            match default_api::put_individual(&self.conf, req.clone()).await {
+            match default_api::put_individual(&self.conf, req) {
                 Ok(_) => println!("acceptance seccessfuly put"),
                 Err(_) => println!("error put")
             };

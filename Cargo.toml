@@ -7,7 +7,6 @@ edition = "2021"
 
 
 [dependencies]
-tokio = { version = "1", features = ["full"] }
 openapi = { path = "./veda_service"}
 askama = "0.12.1"
 tinyfiledialogs = "=3.8.3"

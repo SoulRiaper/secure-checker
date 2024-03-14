@@ -147,7 +147,7 @@ pub enum SetFieldInIndividualError {
 
 
 /// This endpoint adds a specific field to the information of an individual. It requires a user ticket and the individual's URI, along with the details of the field to be added, and supports optional parameters for event handling and transaction control. 
-pub async fn add_field_to_individual(configuration: &configuration::Configuration, add_field_to_individual_request: models::AddFieldToIndividualRequest) -> Result<models::AddFieldToIndividual200Response, Error<AddFieldToIndividualError>> {
+pub fn add_field_to_individual(configuration: &configuration::Configuration, add_field_to_individual_request: models::AddFieldToIndividualRequest) -> Result<models::AddFieldToIndividual200Response, Error<AddFieldToIndividualError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -161,10 +161,10 @@ pub async fn add_field_to_individual(configuration: &configuration::Configuratio
     local_var_req_builder = local_var_req_builder.json(&add_field_to_individual_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -176,7 +176,7 @@ pub async fn add_field_to_individual(configuration: &configuration::Configuratio
 }
 
 /// Authenticates a user with login and password, and optionally a secret.
-pub async fn authenticate_get(configuration: &configuration::Configuration, login: &str, password: &str, secret: Option<&str>) -> Result<models::AuthenticateGet200Response, Error<AuthenticateGetError>> {
+pub fn authenticate_get(configuration: &configuration::Configuration, login: &str, password: &str, secret: Option<&str>) -> Result<models::AuthenticateGet200Response, Error<AuthenticateGetError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -194,10 +194,10 @@ pub async fn authenticate_get(configuration: &configuration::Configuration, logi
     }
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -209,7 +209,7 @@ pub async fn authenticate_get(configuration: &configuration::Configuration, logi
 }
 
 /// This endpoint checks if the provided ticket is valid. The ticket is passed as a query parameter. 
-pub async fn check_ticket_validity(configuration: &configuration::Configuration, ticket: &str) -> Result<bool, Error<CheckTicketValidityError>> {
+pub fn check_ticket_validity(configuration: &configuration::Configuration, ticket: &str) -> Result<bool, Error<CheckTicketValidityError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -223,10 +223,10 @@ pub async fn check_ticket_validity(configuration: &configuration::Configuration,
     }
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -238,7 +238,7 @@ pub async fn check_ticket_validity(configuration: &configuration::Configuration,
 }
 
 /// This endpoint allows users to execute a full text query. It requires a ticket  and a query string, and supports various optional parameters to refine the search. 
-pub async fn execute_full_text_query(configuration: &configuration::Configuration, execute_full_text_query_request: models::ExecuteFullTextQueryRequest) -> Result<models::ExecuteFullTextQuery200Response, Error<ExecuteFullTextQueryError>> {
+pub fn execute_full_text_query(configuration: &configuration::Configuration, execute_full_text_query_request: models::ExecuteFullTextQueryRequest) -> Result<models::ExecuteFullTextQuery200Response, Error<ExecuteFullTextQueryError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -252,10 +252,10 @@ pub async fn execute_full_text_query(configuration: &configuration::Configuratio
     local_var_req_builder = local_var_req_builder.json(&execute_full_text_query_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -267,7 +267,7 @@ pub async fn execute_full_text_query(configuration: &configuration::Configuratio
 }
 
 /// This endpoint retrieves information about a specific individual based  on their unique identifier (URI). It requires a user ticket and the  individual's URI, and optionally allows reopening the query. 
-pub async fn get_individual(configuration: &configuration::Configuration, ticket: &str, uri: &str, reopen: Option<bool>) -> Result<serde_json::Value, Error<GetIndividualError>> {
+pub fn get_individual(configuration: &configuration::Configuration, ticket: &str, uri: &str, reopen: Option<bool>) -> Result<serde_json::Value, Error<GetIndividualError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -285,10 +285,10 @@ pub async fn get_individual(configuration: &configuration::Configuration, ticket
     }
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -300,7 +300,7 @@ pub async fn get_individual(configuration: &configuration::Configuration, ticket
 }
 
 /// This endpoint retrieves membership information of a specific URI. It requires a user ticket and the URI for which the membership details are being queried. 
-pub async fn get_membership(configuration: &configuration::Configuration, ticket: &str, uri: &str) -> Result<models::GetMembership200Response, Error<GetMembershipError>> {
+pub fn get_membership(configuration: &configuration::Configuration, ticket: &str, uri: &str) -> Result<models::GetMembership200Response, Error<GetMembershipError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -315,10 +315,10 @@ pub async fn get_membership(configuration: &configuration::Configuration, ticket
     }
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -330,7 +330,7 @@ pub async fn get_membership(configuration: &configuration::Configuration, ticket
 }
 
 /// This endpoint retrieves information about multiple individuals based on their  unique identifiers (URIs). It requires a user ticket and an array of URIs,  and optionally allows reopening the query. 
-pub async fn get_multiple_individuals(configuration: &configuration::Configuration, get_multiple_individuals_request: models::GetMultipleIndividualsRequest) -> Result<Vec<serde_json::Value>, Error<GetMultipleIndividualsError>> {
+pub fn get_multiple_individuals(configuration: &configuration::Configuration, get_multiple_individuals_request: models::GetMultipleIndividualsRequest) -> Result<Vec<serde_json::Value>, Error<GetMultipleIndividualsError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -344,10 +344,10 @@ pub async fn get_multiple_individuals(configuration: &configuration::Configurati
     local_var_req_builder = local_var_req_builder.json(&get_multiple_individuals_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -359,7 +359,7 @@ pub async fn get_multiple_individuals(configuration: &configuration::Configurati
 }
 
 /// This endpoint retrieves the state of a specified operation. It requires the module ID and the operation ID for which the state is being queried. 
-pub async fn get_operation_state(configuration: &configuration::Configuration, module_id: i32, wait_op_id: i64) -> Result<i64, Error<GetOperationStateError>> {
+pub fn get_operation_state(configuration: &configuration::Configuration, module_id: i32, wait_op_id: i64) -> Result<i64, Error<GetOperationStateError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -374,10 +374,10 @@ pub async fn get_operation_state(configuration: &configuration::Configuration, m
     }
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -389,7 +389,7 @@ pub async fn get_operation_state(configuration: &configuration::Configuration, m
 }
 
 /// This endpoint retrieves information about the origin of access rights for a specific URI. It requires a user ticket and the URI for which the rights origins are being queried. 
-pub async fn get_rights_origin(configuration: &configuration::Configuration, ticket: &str, uri: &str) -> Result<Vec<serde_json::Value>, Error<GetRightsOriginError>> {
+pub fn get_rights_origin(configuration: &configuration::Configuration, ticket: &str, uri: &str) -> Result<Vec<serde_json::Value>, Error<GetRightsOriginError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -404,10 +404,10 @@ pub async fn get_rights_origin(configuration: &configuration::Configuration, tic
     }
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -419,7 +419,7 @@ pub async fn get_rights_origin(configuration: &configuration::Configuration, tic
 }
 
 /// This endpoint retrieves a ticket for another user. It requires both  the ticket of the requesting user and the login of the user for whom  the ticket is being requested. 
-pub async fn get_ticket_for_user(configuration: &configuration::Configuration, ticket: &str, login: &str) -> Result<models::GetTicketForUser200Response, Error<GetTicketForUserError>> {
+pub fn get_ticket_for_user(configuration: &configuration::Configuration, ticket: &str, login: &str) -> Result<models::GetTicketForUser200Response, Error<GetTicketForUserError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -434,10 +434,10 @@ pub async fn get_ticket_for_user(configuration: &configuration::Configuration, t
     }
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -449,7 +449,7 @@ pub async fn get_ticket_for_user(configuration: &configuration::Configuration, t
 }
 
 /// This endpoint updates or inserts information about an individual.  It requires a user ticket and the individual object, with optional  parameters for event handling and transaction control. 
-pub async fn put_individual(configuration: &configuration::Configuration, put_individual_request: models::PutIndividualRequest) -> Result<models::PutIndividual200Response, Error<PutIndividualError>> {
+pub fn put_individual(configuration: &configuration::Configuration, put_individual_request: models::PutIndividualRequest) -> Result<models::PutIndividual200Response, Error<PutIndividualError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -463,10 +463,10 @@ pub async fn put_individual(configuration: &configuration::Configuration, put_in
     local_var_req_builder = local_var_req_builder.json(&put_individual_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -478,7 +478,7 @@ pub async fn put_individual(configuration: &configuration::Configuration, put_in
 }
 
 /// This endpoint updates or inserts information about multiple individuals.  It requires a user ticket and an array of individual objects, with optional  parameters for event handling and transaction control. 
-pub async fn put_multiple_individuals(configuration: &configuration::Configuration, put_multiple_individuals_request: models::PutMultipleIndividualsRequest) -> Result<models::PutIndividual200Response, Error<PutMultipleIndividualsError>> {
+pub fn put_multiple_individuals(configuration: &configuration::Configuration, put_multiple_individuals_request: models::PutMultipleIndividualsRequest) -> Result<models::PutIndividual200Response, Error<PutMultipleIndividualsError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -492,10 +492,10 @@ pub async fn put_multiple_individuals(configuration: &configuration::Configurati
     local_var_req_builder = local_var_req_builder.json(&put_multiple_individuals_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -507,7 +507,7 @@ pub async fn put_multiple_individuals(configuration: &configuration::Configurati
 }
 
 /// This endpoint removes a specific field from the information of an individual. It requires a user ticket and the individual's URI, along with the details of the field to be removed,  and supports optional parameters for event handling and transaction control. 
-pub async fn remove_field_from_individual(configuration: &configuration::Configuration, remove_field_from_individual_request: models::RemoveFieldFromIndividualRequest) -> Result<models::RemoveIndividual200Response, Error<RemoveFieldFromIndividualError>> {
+pub fn remove_field_from_individual(configuration: &configuration::Configuration, remove_field_from_individual_request: models::RemoveFieldFromIndividualRequest) -> Result<models::RemoveIndividual200Response, Error<RemoveFieldFromIndividualError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -521,10 +521,10 @@ pub async fn remove_field_from_individual(configuration: &configuration::Configu
     local_var_req_builder = local_var_req_builder.json(&remove_field_from_individual_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -536,7 +536,7 @@ pub async fn remove_field_from_individual(configuration: &configuration::Configu
 }
 
 /// This endpoint removes information about a specific individual.  It requires a user ticket and the URI of the individual, with optional  parameters for event handling and transaction control. 
-pub async fn remove_individual(configuration: &configuration::Configuration, remove_individual_request: models::RemoveIndividualRequest) -> Result<models::RemoveIndividual200Response, Error<RemoveIndividualError>> {
+pub fn remove_individual(configuration: &configuration::Configuration, remove_individual_request: models::RemoveIndividualRequest) -> Result<models::RemoveIndividual200Response, Error<RemoveIndividualError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -550,10 +550,10 @@ pub async fn remove_individual(configuration: &configuration::Configuration, rem
     local_var_req_builder = local_var_req_builder.json(&remove_individual_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
@@ -565,7 +565,7 @@ pub async fn remove_individual(configuration: &configuration::Configuration, rem
 }
 
 /// This endpoint sets or updates a specific field in the information of an individual. It requires a user ticket and the individual's URI, along with the details of the field to be set or updated, and supports optional parameters for event handling and transaction control. 
-pub async fn set_field_in_individual(configuration: &configuration::Configuration, set_field_in_individual_request: models::SetFieldInIndividualRequest) -> Result<models::SetFieldInIndividual200Response, Error<SetFieldInIndividualError>> {
+pub fn set_field_in_individual(configuration: &configuration::Configuration, set_field_in_individual_request: models::SetFieldInIndividualRequest) -> Result<models::SetFieldInIndividual200Response, Error<SetFieldInIndividualError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -579,10 +579,10 @@ pub async fn set_field_in_individual(configuration: &configuration::Configuratio
     local_var_req_builder = local_var_req_builder.json(&set_field_in_individual_request);
 
     let local_var_req = local_var_req_builder.build()?;
-    let local_var_resp = local_var_client.execute(local_var_req).await?;
+    let local_var_resp = local_var_client.execute(local_var_req)?;
 
     let local_var_status = local_var_resp.status();
-    let local_var_content = local_var_resp.text().await?;
+    let local_var_content = local_var_resp.text()?;
 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
