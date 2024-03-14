@@ -1,6 +1,9 @@
 pub mod veda_client {
 
+    use std::fmt::Error;
     use openapi::apis::{configuration, default_api};
+    use openapi::models::*;
+    use std::hash::{DefaultHasher, Hasher};
 
     pub struct VedaClient {
         auth_ticket : String,
@@ -28,16 +31,17 @@ pub mod veda_client {
             }
         }
 
-        pub async fn authenticate(&mut self, login: &str, pass: &str) {
+        pub async fn authenticate(&mut self, login: &str, pass: &str) -> Result<(), Error> {
             let res = default_api::authenticate_get(&self.conf, login, pass, None).await;
 
             match res {
                 Ok(res) => {
                     self.auth_ticket = res.id.unwrap_or_default().to_string();
                     self.user = res.user_uri.unwrap_or_default().to_string();
+                    Ok(())
                 }
-                Err(err) => {
-                    println!("Login error: {}.Exit.", err.to_string());
+                Err(_) => {
+                    Err(Error::default())
                 }
             }
         }
@@ -51,7 +55,42 @@ pub mod veda_client {
             &self.user
         }
 
-        pub async fn get_individual_by_uri(&self, uri: &str) {
+        pub async fn get_individual_by_uri(&self, uri: &str) -> Option<String> {
+            match default_api::get_individual(&self.conf, &self.auth_ticket, uri, None).await {
+                Ok(json) => {
+                    Some(json.to_string())
+                }
+                Err(_) => {
+                    None
+                }
+            }
+        }
+
+        pub async fn put_policy_data(&self, username: String, date: String) {
+            let acceptance_uri = format!("cs:{}_pf", self.get_username_hash(username.clone()));
+            let req_json = serde_json::json!({
+                "@": acceptance_uri,
+                "rdf:type":[{"data":"cs:SecurityPolicy","type":"Uri"}],
+                "cs:familiarizedUser": [
+                    {
+                      "data": username,
+                      "type": "String"
+                    }
+                  ],
+            });
+
+            let req: PutIndividualRequest = PutIndividualRequest::new(self.auth_ticket.to_string().clone(), req_json);
+            println!("ticket: {} add new acceptance uri: {}",req.ticket,  acceptance_uri);
+            match default_api::put_individual(&self.conf, req.clone()).await {
+                Ok(_) => println!("acceptance seccessfuly put"),
+                Err(_) => println!("error put")
+            };
+        }
+
+        fn get_username_hash(&self, username: String) -> u64 {
+            let mut hasher = DefaultHasher::new();
+            hasher.write(&username.as_bytes());
+            return hasher.finish();
         }
 
     }
