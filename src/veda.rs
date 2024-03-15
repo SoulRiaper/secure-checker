@@ -5,7 +5,7 @@ pub mod veda_client {
     // use ring::digest::{digest, SHA256};
     // use hex::encode;
     use chrono::{DateTime, Months};
-    use chrono::offset::{Utc};
+    use chrono::offset::Utc;
 
     pub struct VedaClient {
         auth_ticket : String,
@@ -102,17 +102,20 @@ pub mod veda_client {
         pub fn is_acceptance_valid(&self, json: serde_json::Value) -> bool {
             match self.get_individ_property(json, "v-s:date".to_string()) {
                 Some(date) => {
-                    println!("{}",date.as_str().trim());
-                    let acceptance_date = DateTime::parse_from_str(date.as_str().trim(), "\"%Y-%m-%dT%H:%M:%SZ\"");
+                    let date_str = date.as_str().trim();
+                    println!("{}",date_str);
+                    let acceptance_date = DateTime::parse_from_rfc3339(date_str);
+
                     match acceptance_date {
                         Ok(res) => {
                             println!("trying to compare strings");
                             let date = res.with_timezone(&Utc);
                             let now = Utc::now();
-                            return now > date;
+                            println!("date: {} now: {}", date.to_string(), now.to_string());
+                            return now < date;
                         }
-                        Err(_) => {
-                            println!("Cant parse string");
+                        Err(e) => {
+                            println!("Cant parse string, err={}", e.to_string());
                             false
                         }
                     }
@@ -127,7 +130,7 @@ pub mod veda_client {
                     match date_bundle.get(0) {
                         Some(date_obj) => {
                             match date_obj.get("data") {
-                                Some(date) => Some(date.to_string()),
+                                Some(date) => Some(format!("{}", date.as_str().unwrap())),
                                 None => None
                             }
                         }

@@ -34,10 +34,10 @@ fn main() {
                 println!("Acceptance OK");
                 return;
             } else {
-                println!("Acceptance end time, try to get new")
+                println!("Acceptance end time, Try to get new")
             }
         }
-        Err(_) => println!("Acceptance not found. Tru to show main")
+        Err(_) => println!("Acceptance not found. Try to get new")
     };
 
     let formatted_html = render_main_view(username.clone(), format!("No policy today."));
