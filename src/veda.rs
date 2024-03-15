@@ -1,14 +1,17 @@
 pub mod veda_client {
 
-    use std::fmt::Error;
     use openapi::apis::{configuration, default_api};
     use openapi::models::*;
-    use std::hash::{DefaultHasher, Hasher};
+    use ring::digest::{digest, SHA256};
+    use hex::encode;
+    use chrono::DateTime;
+    use chrono::offset::Utc;
 
     pub struct VedaClient {
         auth_ticket : String,
         conf: configuration::Configuration,
-        user: String
+        user: String,
+        uri_addition: String
     }
 
     impl VedaClient {
@@ -19,19 +22,12 @@ pub mod veda_client {
             return VedaClient{
                 auth_ticket: String::default(),
                 conf,
-                user: String::default()
+                user: String::default(),
+                uri_addition: "_paccept".to_string()
             };
         }
 
-        pub fn default() -> Self {
-            return VedaClient{
-                auth_ticket: String::default(),
-                conf: configuration::Configuration::default(),
-                user: String::default()
-            }
-        }
-
-        pub fn authenticate(&mut self, login: &str, pass: &str) -> Result<(), Error> {
+        pub fn authenticate(&mut self, login: &str, pass: &str) -> Result<(), String> {
             let res = default_api::authenticate_get(&self.conf, login, pass, None);
 
             match res {
@@ -40,57 +36,88 @@ pub mod veda_client {
                     self.user = res.user_uri.unwrap_or_default().to_string();
                     Ok(())
                 }
-                Err(_) => {
-                    Err(Error::default())
+                Err(err) => {
+                    Err(err.to_string())
                 }
             }
         }
 
-
-        pub fn get_auth_ticket(&self) -> &String {
-            &self.auth_ticket
-        }
-
-        pub fn get_user_account(&self) -> &String {
-            &self.user
-        }
-
-        pub fn get_individual_by_uri(&self, uri: &str) -> Option<String> {
+        pub fn get_individual_by_uri(&self, uri: &str) -> Result<serde_json::Value, String> {
             match default_api::get_individual(&self.conf, &self.auth_ticket, uri, None) {
                 Ok(json) => {
-                    Some(json.to_string())
+                    Ok(json)
                 }
-                Err(_) => {
-                    None
+                Err(err) => {
+                    Err(err.to_string())
                 }
             }
         }
 
-        pub fn put_policy_data(&self, username: String, date: String) {
-            let acceptance_uri = format!("d:{}_pf", self.get_username_hash(username.clone()));
+        pub fn put_policy_acceptance_data(&self, username: String, date: String) -> Result<(), String> {
+            let acceptance_uri = format!("d:{}{}", username, self.uri_addition);
             let req_json = serde_json::json!({
                 "@": acceptance_uri,
-                "rdf:type":[{"data":"v-s:SecurityPolicy","type":"Uri"}],
-                "v-s:familiarizedUser": [
+                "rdf:type":[{"data":"cs:SecurityPolicy", "type" : "Uri"}],
+                "cs:familiarizedUser": [
                     {
                       "data": username,
                       "type": "String"
                     }
                   ],
+                "v-s:dateFrom": [
+                    {
+                        "data": date,
+                        "type": "Datetime"
+                    }
+                ]
             });
 
             let req: PutIndividualRequest = PutIndividualRequest::new(self.auth_ticket.to_string().clone(), req_json);
             println!("ticket: {} add new acceptance uri: {}",req.ticket,  acceptance_uri);
-            match default_api::put_individual(&self.conf, req) {
-                Ok(_) => println!("acceptance seccessfuly put"),
-                Err(_) => println!("error put")
-            };
+            match default_api::put_individual(&self.conf, &self.auth_ticket, req) {
+                Ok(_) => {
+                    println!("acceptance seccessfuly put");
+                    Ok(())
+                },
+                Err(err) => {
+                    println!("error put");
+                    Err(err.to_string())
+                }
+            }
         }
 
-        fn get_username_hash(&self, username: String) -> u64 {
-            let mut hasher = DefaultHasher::new();
-            hasher.write(&username.as_bytes());
-            return hasher.finish();
+        pub fn get_user_policy_acceptance(&self, username: String) -> Result<serde_json::Value, String> {
+            let acceptance_uri = format!("d:{}{}", username, self.uri_addition);
+            match self.get_individual_by_uri(&acceptance_uri) {
+                Ok(json) => Ok(json),
+                Err(err) => Err(err)
+            }
+        }
+
+        //TODO: если понадобится хешировать имя юзера, взять слайс длинной 45-50 
+        fn get_username_hash(&self, username: String) -> String {
+            return encode(digest(&SHA256, username.as_bytes()).as_ref());
+        }
+
+        pub fn is_individ_acceptance_valid(&self, json: serde_json::Value) -> bool {
+            match self.get_individ_property(json, "v-s:dateTo".to_string()) {
+                Some(date) => {
+
+                }
+                None => false
+            }
+        }
+
+        pub fn get_individ_property(&self, json: serde_json::Value, property_name: String) -> Option<String> {
+            match json.get(property_name) {
+                Some(date_bundle) => {
+                    match date_bundle.get(0) {
+                        Some(date_obj) => Some(date_obj.get("data").unwrap().to_string()),
+                        None => None
+                    }
+                }
+                None => None
+            }
         }
 
     }

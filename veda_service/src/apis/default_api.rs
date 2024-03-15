@@ -449,7 +449,7 @@ pub fn get_ticket_for_user(configuration: &configuration::Configuration, ticket:
 }
 
 /// This endpoint updates or inserts information about an individual.  It requires a user ticket and the individual object, with optional  parameters for event handling and transaction control. 
-pub fn put_individual(configuration: &configuration::Configuration, put_individual_request: models::PutIndividualRequest) -> Result<models::PutIndividual200Response, Error<PutIndividualError>> {
+pub fn put_individual(configuration: &configuration::Configuration, ticket: &str, put_individual_request: models::PutIndividualRequest) -> Result<models::PutIndividual200Response, Error<PutIndividualError>> {
     let local_var_configuration = configuration;
 
     let local_var_client = &local_var_configuration.client;
@@ -457,6 +457,7 @@ pub fn put_individual(configuration: &configuration::Configuration, put_individu
     let local_var_uri_str = format!("{}/put_individual", local_var_configuration.base_path);
     let mut local_var_req_builder = local_var_client.request(reqwest::Method::PUT, local_var_uri_str.as_str());
 
+    local_var_req_builder = local_var_req_builder.query(&[("ticket", &ticket.to_string())]);
     if let Some(ref local_var_user_agent) = local_var_configuration.user_agent {
         local_var_req_builder = local_var_req_builder.header(reqwest::header::USER_AGENT, local_var_user_agent.clone());
     }

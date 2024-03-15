@@ -360,6 +360,14 @@ paths:
         It requires a user ticket and the individual object, with optional 
         parameters for event handling and transaction control.
       operationId: putIndividual
+      parameters:
+      - name: ticket
+        in: query
+        required: true
+        description: The unique identifier of the user's ticket.
+        schema:
+          type: string
+          example: f04f82a4-a7c2-4545-ba6c-b20f7022ca5c
       requestBody:
         required: true
         content:

@@ -332,7 +332,7 @@ No authorization required
 
 ## put_individual
 
-> models::PutIndividual200Response put_individual(put_individual_request)
+> models::PutIndividual200Response put_individual(ticket, put_individual_request)
 Put One Individual
 
 This endpoint updates or inserts information about an individual.  It requires a user ticket and the individual object, with optional  parameters for event handling and transaction control. 
@@ -342,6 +342,7 @@ This endpoint updates or inserts information about an individual.  It requires a
 
 Name | Type | Description  | Required | Notes
 ------------- | ------------- | ------------- | ------------- | -------------
+**ticket** | **String** | The unique identifier of the user's ticket. | [required] |
 **put_individual_request** | [**PutIndividualRequest**](PutIndividualRequest.md) |  | [required] |
 
 ### Return type

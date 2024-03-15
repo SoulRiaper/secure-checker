@@ -3,10 +3,10 @@
 mod view;
 mod veda;
 
-use web_view::*;
 use std::env;
 use view::view::render_main_view;
 use veda::veda_client::VedaClient;
+use web_view::*;
 
 fn main() {
     let mut client: VedaClient = VedaClient::new("http://localhost:8080".to_string());
@@ -27,42 +27,45 @@ fn main() {
         Err(_) => "undefined".to_string()
     };
 
-    let data_from_veda = client.get_individual_by_uri("v-s:SuperMegaURI").unwrap();
+    match client.get_user_policy_acceptance(username.clone()) {
+        Ok(json) => {
+            let date = json.get("v-s:dateFrom").unwrap().as_array();
+        }
+        Err(_) => println!("Acceptance not found. Tru to show main")
+    };
 
-    let formatted_html = render_main_view(username.clone(), format!("No policy today. data from veda: {}", data_from_veda));
-
-
-    web_view::builder()
-        .title("Привет!")
-        .content(Content::Html(formatted_html))
-        .size(800, 600)
-        .resizable(false)
-        .user_data(())
-        .invoke_handler(move |_webview, _arg| {
-
-            println!("Arg: {}", _arg);
-            match _arg {
-                "user_accept_policy" => {
-                    let user_data = username.clone();
-                    println!("User {} accept policy", user_data);
-                    client.put_policy_data(username.clone(), "".to_string());
-
-                    _webview.exit();
-                }
-                "user_reject_policy" => {
-                    println!("User reject policy"); 
-                    _webview.exit();
-                }
-                _ => {
-                    println!("Bad input");
-                }
-            }
-            Ok(())
-        })
-        .build()
-        .unwrap()
-        .run()
-        .unwrap();
+    let formatted_html = render_main_view(username.clone(), format!("No policy today."));
     
-        
+    web_view::builder()
+    .title("Привет!")
+    .content(Content::Html(formatted_html))
+    .size(800, 600)
+    .resizable(false)
+    .user_data(())
+    .invoke_handler(move |_webview, _arg| {
+
+        println!("Arg: {}", _arg);
+        match _arg {
+            "user_accept_policy" => {
+                let user_data = username.clone();
+                println!("User {} accept policy", user_data);
+                client.put_policy_acceptance_data(username.clone(), "".to_string());
+
+                _webview.exit();
+            }
+            "user_reject_policy" => {
+                println!("User reject policy"); 
+                _webview.exit();
+            }
+            _ => {
+                println!("Bad input");
+            }
+        }
+        Ok(())
+    })
+    .build()
+    .unwrap()
+    .run()
+    .unwrap();
+
 }
