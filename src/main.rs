@@ -11,12 +11,13 @@ use clap::{arg, command, ArgAction};
 
 fn main() {
 
-    let matches = command!() // requires `cargo` feature
+    let matches = command!()
         .arg(arg!(-u --base_uri <VALUE>).required(true).action(ArgAction::Set))
         .get_matches();
     
     let base_uri = matches.get_one::<String>("base_uri").expect("required");
 
+    //TODO: need to store auth data in another place
     let mut client: VedaClient = VedaClient::new(base_uri.clone());
     let login = "karpovrt";
     let pass  = "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3";
@@ -32,7 +33,7 @@ fn main() {
 
     let username = match env::var("USERNAME").or_else(|_| env::var("USER")) {
         Ok(res) => res,
-        //need to logout user
+        //TODO: need to logout user??
         Err(_) => "undefined".to_string()
     };
 
@@ -50,6 +51,7 @@ fn main() {
 
     let formatted_html = render_main_view(username.clone(), format!("No policy today."));
     
+    //TODO: Fix window params!!!
     web_view::builder()
     .title("Привет!")
     .content(Content::Html(formatted_html))
