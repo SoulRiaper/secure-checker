@@ -7,9 +7,17 @@ use std::env;
 use view::view::render_main_view;
 use veda::veda_client::VedaClient;
 use web_view::*;
+use clap::{arg, command, ArgAction};
 
 fn main() {
-    let mut client: VedaClient = VedaClient::new("http://localhost:8080".to_string());
+
+    let matches = command!() // requires `cargo` feature
+        .arg(arg!(-u --base_uri <VALUE>).required(true).action(ArgAction::Set))
+        .get_matches();
+    
+    let base_uri = matches.get_one::<String>("base_uri").expect("required");
+
+    let mut client: VedaClient = VedaClient::new(base_uri.clone());
     let login = "karpovrt";
     let pass  = "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3";
     match client.authenticate(login, pass) {
