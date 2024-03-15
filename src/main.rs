@@ -24,12 +24,18 @@ fn main() {
 
     let username = match env::var("USERNAME").or_else(|_| env::var("USER")) {
         Ok(res) => res,
+        //need to logout user
         Err(_) => "undefined".to_string()
     };
 
     match client.get_user_policy_acceptance(username.clone()) {
         Ok(json) => {
-            let date = json.get("v-s:dateFrom").unwrap().as_array();
+            if client.is_acceptance_valid(json) {
+                println!("Acceptance OK");
+                return;
+            } else {
+                println!("Acceptance end time, try to get new")
+            }
         }
         Err(_) => println!("Acceptance not found. Tru to show main")
     };
@@ -49,9 +55,12 @@ fn main() {
             "user_accept_policy" => {
                 let user_data = username.clone();
                 println!("User {} accept policy", user_data);
-                client.put_policy_acceptance_data(username.clone(), "".to_string());
-
-                _webview.exit();
+                match client.put_policy_acceptance_data(username.clone(), client.get_now_date_when_acceptance_expiers_string()) {
+                    Ok(_) => {
+                        _webview.exit();
+                    }
+                    Err(_) => ()
+                }
             }
             "user_reject_policy" => {
                 println!("User reject policy"); 
