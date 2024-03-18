@@ -10,7 +10,7 @@ use veda::veda_client::VedaClient;
 use web_view::*;
 use clap::{arg, command, ArgAction};
 use local_storage::storage::*;
-use std::process::Command;
+use system_shutdown::logout;
 
 fn main() {
 
@@ -115,7 +115,7 @@ fn main() {
             "user_reject_policy" => {
                 println!("User reject policy"); 
                 _webview.exit();
-                log_out_user();
+                logout();
             }
             _ => {
                 println!("Bad input");
@@ -130,9 +130,3 @@ fn main() {
 
 }
 
-pub fn log_out_user() -> std::io::Result<()> {
-    let mut command = Command::new("shutdown.exe");
-    command.args(&["/l"]);
-    let result = command.status()?;
-    Ok(())
-  } 
