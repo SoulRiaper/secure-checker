@@ -21,7 +21,7 @@ fn main() {
     let base_uri = matches.get_one::<String>("base_uri").expect("required");
 
     let mut client: VedaClient = VedaClient::new(base_uri.clone());
-    let login = "karpovrt";
+    let login = "vedadmin";
     let pass  = "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3";
     let mut is_veda_available = false;
 
