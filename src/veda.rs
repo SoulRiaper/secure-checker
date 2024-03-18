@@ -6,6 +6,7 @@ pub mod veda_client {
     // use hex::encode;
     use chrono::{DateTime, Months};
     use chrono::offset::Utc;
+    use serde_json::Value;
 
     pub struct VedaClient {
         auth_ticket : String,
@@ -54,8 +55,34 @@ pub mod veda_client {
         }
 
         pub fn put_policy_acceptance_data(&self, username: String, date: String) -> Result<(), String> {
+            let req_json = self.get_acceptance_obj(username, date);
+
+            let req: PutIndividualRequest = PutIndividualRequest::new(self.auth_ticket.to_string().clone(), req_json);
+            println!("PUT OBJ:{}", req.individual.to_string());
+            match default_api::put_individual(&self.conf, &self.auth_ticket, req) {
+                Ok(_) => {
+                    println!("acceptance seccessfuly put");
+                    Ok(())
+                },
+                Err(err) => {
+                    println!("error put");
+                    Err(err.to_string())
+                }
+            }
+        }
+
+        pub fn put_acceptance_obj(&self, json : Value) {
+            let req: PutIndividualRequest = PutIndividualRequest::new(self.auth_ticket.to_string().clone(), json);
+
+            match default_api::put_individual(&self.conf, &self.auth_ticket, req) {
+                Ok(_) => (),
+                Err(_) => ()
+            }
+        }
+
+        pub fn get_acceptance_obj(&self, username: String, date: String) -> Value {
             let acceptance_uri = format!("d:{}{}", username, self.uri_addition);
-            let req_json = serde_json::json!({
+            serde_json::json!({
                 "@": acceptance_uri,
                 "rdf:type":[{"data":"cs:SecurityPolicy", "type" : "Uri"}],
                 "cs:familiarizedUser": [
@@ -70,20 +97,7 @@ pub mod veda_client {
                         "type": "Datetime"
                     }
                 ]
-            });
-
-            let req: PutIndividualRequest = PutIndividualRequest::new(self.auth_ticket.to_string().clone(), req_json);
-            println!("PUT OBJ:{}", req.individual.to_string());
-            match default_api::put_individual(&self.conf, &self.auth_ticket, req) {
-                Ok(_) => {
-                    println!("acceptance seccessfuly put");
-                    Ok(())
-                },
-                Err(err) => {
-                    println!("error put");
-                    Err(err.to_string())
-                }
-            }
+            })
         }
 
         pub fn get_user_policy_acceptance(&self, username: String) -> Result<serde_json::Value, String> {
@@ -103,12 +117,10 @@ pub mod veda_client {
             match self.get_individ_property(json, "v-s:date".to_string()) {
                 Some(date) => {
                     let date_str = date.as_str().trim();
-                    println!("{}",date_str);
                     let acceptance_date = DateTime::parse_from_rfc3339(date_str);
 
                     match acceptance_date {
                         Ok(res) => {
-                            println!("trying to compare strings");
                             let date = res.with_timezone(&Utc);
                             let now = Utc::now();
                             println!("date: {} now: {}", date.to_string(), now.to_string());
@@ -141,7 +153,7 @@ pub mod veda_client {
             }
         }
 
-        pub fn get_now_date_when_acceptance_expiers_string(&self) -> String {
+        pub fn get_date_when_acceptance_expiers(&self) -> String {
             let now = Utc::now();
             let mounths = Months::new(3);
             match now.checked_add_months(mounths) {
