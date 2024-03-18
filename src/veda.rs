@@ -84,8 +84,8 @@ pub mod veda_client {
             let acceptance_uri = format!("d:{}{}", username, self.uri_addition);
             serde_json::json!({
                 "@": acceptance_uri,
-                "rdf:type":[{"data":"cs:SecurityPolicy", "type" : "Uri"}],
-                "cs:familiarizedUser": [
+                "rdf:type":[{"data":"v-s:SecurityPolicy", "type" : "Uri"}],
+                "v-s:familiarizedUser": [
                     {
                       "data": username,
                       "type": "String"
