@@ -44,7 +44,7 @@ fn main() {
         Ok(json) => {
             if client.is_acceptance_valid(json) {
                 println!("Acceptance OK");
-                return;
+                return
             } else {
                 if is_acceptance_info_stored(username.clone()) {
                     println!("Found local accetance, try to load");
@@ -59,20 +59,14 @@ fn main() {
             }
         }
         Err(_) => {
-            match get_user_stored_info(username.clone()) {
-                Ok(res) => {
-                    if client.is_acceptance_valid(res.clone()) {
-                        println!("Locally stored acceptance valid, veda: {}", is_veda_available);
-                        if is_veda_available {
-                            client.put_acceptance_obj(res);
-                            remove_acceptance_local_info(username.clone());
-                            println!("Put local acceptance to veda");
-                        }
-                        return;
+            if let Ok(res) = get_user_stored_info(username.clone()) {
+                if client.is_acceptance_valid(res.clone()) {
+                    if is_veda_available {
+                        client.put_acceptance_obj(res);
+                        remove_acceptance_local_info(username.clone());
+                        println!("Put local acceptance to veda");
                     }
-                }
-                Err(_) => {
-                    println!("Acceptance not found, Try to get new")
+                    return
                 }
             }
         }
