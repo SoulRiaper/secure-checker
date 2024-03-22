@@ -2,8 +2,6 @@ pub mod veda_client {
 
     use openapi::apis::{configuration, default_api};
     use openapi::models::*;
-    // use ring::digest::{digest, SHA256};
-    // use hex::encode;
     use chrono::{DateTime, Months};
     use chrono::offset::Utc;
     use serde_json::Value;
@@ -99,29 +97,18 @@ pub mod veda_client {
             }
         }
 
-        // //TODO: если понадобится хешировать имя юзера, взять слайс длинной 45-50 
-        // fn get_username_hash(&self, username: String) -> String {
-        //     return encode(digest(&SHA256, username.as_bytes()).as_ref());
-        // }
-
         pub fn is_acceptance_valid(&self, json: serde_json::Value) -> bool {
             match self.get_individ_property(json, "v-s:date".to_string()) {
                 Some(date) => {
                     let date_str = date.as_str().trim();
                     let acceptance_date = DateTime::parse_from_rfc3339(date_str);
 
-                    match acceptance_date {
-                        Ok(res) => {
+                    if let Ok(res) = acceptance_date {
                             let date = res.with_timezone(&Utc);
                             let now = Utc::now();
                             println!("date: {} now: {}", date, now);
                             now < date
-                        }
-                        Err(e) => {
-                            println!("Cant parse string, err={}", e);
-                            false
-                        }
-                    }
+                        } else {false}
                 }
                 None => false
             }
@@ -132,7 +119,9 @@ pub mod veda_client {
                 Some(date_bundle) => {
                     match date_bundle.get(0) {
                         Some(date_obj) => {
-                            date_obj.get("data").map(|date| date.to_string())
+                            date_obj.get("data").map(|date| {
+                                format!("{}", date.as_str().unwrap())
+                            })
                         }
                         None => None
                     }
@@ -151,6 +140,5 @@ pub mod veda_client {
                 None => String::default()
             }
         }
-
     }
 }
