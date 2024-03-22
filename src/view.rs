@@ -1,4 +1,4 @@
-pub mod view {
+pub mod main_view {
 
     use askama::Template;
 
@@ -14,6 +14,6 @@ pub mod view {
             user,
             policy_text
         };
-        return template.render().ok().unwrap_or_default();
+        template.render().ok().unwrap_or_default()
     }
 }

@@ -5,7 +5,7 @@ mod veda;
 mod local_storage;
 
 use std::env;
-use view::view::render_main_view;
+use view::main_view::render_main_view;
 use veda::veda_client::VedaClient;
 use web_view::*;
 use clap::{arg, command, ArgAction};
@@ -48,14 +48,11 @@ fn main() {
             } else {
                 if is_acceptance_info_stored(username.clone()) {
                     println!("Found local accetance, try to load");
-                    match get_user_stored_info(username.clone()) {
-                        Ok(json) => {
-                            if client.is_acceptance_valid(json.clone()) {
-                                println!("Put local acceptance to veda");
-                                
-                            }
+                    if let Ok(json) = get_user_stored_info(username.clone()) {
+                        if client.is_acceptance_valid(json.clone()) {
+                        //TODO : Add local acceptance to veda
+                        println!("Put local acceptance to veda");
                         }
-                        Err(_) => ()
                     }
                 }
                 println!("Acceptance end time, Try to get new")
@@ -81,7 +78,7 @@ fn main() {
         }
     };
 
-    let formatted_html = render_main_view(username.clone(), format!("No policy today."));
+    let formatted_html = render_main_view(username.clone(), "No policy today.".to_string());
     
     web_view::builder()
     .title("Ознакомление с политиками безопасности")
@@ -90,24 +87,17 @@ fn main() {
     .resizable(false)
     .user_data(())
     .invoke_handler(move |_webview, _arg| {
-
         println!("Arg: {}", _arg);
         match _arg {
             "user_accept_policy" => {
                 if is_veda_available {
-                    match client.put_policy_acceptance_data(username.clone(), client.get_date_when_acceptance_expiers()) {
-                        Ok(_) => {
-                            _webview.exit();
-                        }
-                        Err(_) => ()
+                    if client.put_policy_acceptance_data(username.clone(), client.get_date_when_acceptance_expiers()).is_ok() {
+                       _webview.exit();
                     }
                 } else {
                     let acceptance_obj = client.get_acceptance_obj(username.clone(), client.get_date_when_acceptance_expiers());
-                    match write_user_info_localy(acceptance_obj, username.clone()) {
-                        Ok(_) => {
-                            _webview.exit();
-                        }
-                        Err(_) => ()
+                    if write_user_info_localy(acceptance_obj, username.clone()).is_ok() {
+                        _webview.exit();
                     }
                 }
                 
@@ -115,7 +105,7 @@ fn main() {
             "user_reject_policy" => {
                 println!("User reject policy"); 
                 _webview.exit();
-                logout();
+                let _ = logout();
             }
             _ => {
                 println!("Bad input");
@@ -123,10 +113,10 @@ fn main() {
         }
         Ok(())
     })
+    .frameless(true)
     .build()
     .unwrap()
     .run()
     .unwrap();
 
 }
-

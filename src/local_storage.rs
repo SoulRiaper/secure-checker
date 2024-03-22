@@ -33,10 +33,7 @@ pub mod storage {
     }
 
     pub fn is_acceptance_info_stored(username: String) -> bool {
-        match File::open(username) {
-            Ok(_) => true,
-            Err(_) => false
-        }
+        File::open(username).is_ok()
     }
 
     pub fn remove_acceptance_local_info(username: String) {

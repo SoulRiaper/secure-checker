@@ -18,14 +18,16 @@ pub mod veda_client {
     impl VedaClient {
         
         pub fn new(base_path: String) -> Self {
-            let mut conf = configuration::Configuration::default();
-            conf.base_path = base_path;
-            return VedaClient{
+            let conf = configuration::Configuration{
+                base_path,
+                ..Default::default()
+            };
+            VedaClient{
                 auth_ticket: String::default(),
                 conf,
                 user: String::default(),
                 uri_addition: "_paccept".to_string()
-            };
+            }
         }
 
         pub fn authenticate(&mut self, login: &str, pass: &str) -> Result<(), String> {
@@ -58,26 +60,15 @@ pub mod veda_client {
             let req_json = self.get_acceptance_obj(username, date);
 
             let req: PutIndividualRequest = PutIndividualRequest::new(self.auth_ticket.to_string().clone(), req_json);
-            println!("PUT OBJ:{}", req.individual.to_string());
-            match default_api::put_individual(&self.conf, &self.auth_ticket, req) {
-                Ok(_) => {
-                    println!("acceptance seccessfuly put");
-                    Ok(())
-                },
-                Err(err) => {
-                    println!("error put");
-                    Err(err.to_string())
-                }
-            }
+            println!("PUT OBJ:{}", req.individual);
+            if default_api::put_individual(&self.conf, &self.auth_ticket, req).is_ok() {Ok(())}
+            else { Err("cant put data".to_string()) }
         }
 
         pub fn put_acceptance_obj(&self, json : Value) {
             let req: PutIndividualRequest = PutIndividualRequest::new(self.auth_ticket.to_string().clone(), json);
 
-            match default_api::put_individual(&self.conf, &self.auth_ticket, req) {
-                Ok(_) => (),
-                Err(_) => ()
-            }
+            if default_api::put_individual(&self.conf, &self.auth_ticket, req).is_ok() {}
         }
 
         pub fn get_acceptance_obj(&self, username: String, date: String) -> Value {
@@ -123,11 +114,11 @@ pub mod veda_client {
                         Ok(res) => {
                             let date = res.with_timezone(&Utc);
                             let now = Utc::now();
-                            println!("date: {} now: {}", date.to_string(), now.to_string());
-                            return now < date;
+                            println!("date: {} now: {}", date, now);
+                            now < date
                         }
                         Err(e) => {
-                            println!("Cant parse string, err={}", e.to_string());
+                            println!("Cant parse string, err={}", e);
                             false
                         }
                     }
@@ -141,10 +132,7 @@ pub mod veda_client {
                 Some(date_bundle) => {
                     match date_bundle.get(0) {
                         Some(date_obj) => {
-                            match date_obj.get("data") {
-                                Some(date) => Some(format!("{}", date.as_str().unwrap())),
-                                None => None
-                            }
+                            date_obj.get("data").map(|date| date.to_string())
                         }
                         None => None
                     }
