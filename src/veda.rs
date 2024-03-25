@@ -98,47 +98,38 @@ pub mod veda_client {
         }
 
         pub fn is_acceptance_valid(&self, json: serde_json::Value) -> bool {
-            match self.get_individ_property(json, "v-s:date".to_string()) {
-                Some(date) => {
-                    let date_str = date.as_str().trim();
-                    let acceptance_date = DateTime::parse_from_rfc3339(date_str);
+            if let Some(date) = self.get_individ_property(json, "v-s:date".to_string()) {
+                let date_str = date.as_str().trim();
+                let acceptance_date = DateTime::parse_from_rfc3339(date_str);
 
-                    if let Ok(res) = acceptance_date {
-                            let date = res.with_timezone(&Utc);
-                            let now = Utc::now();
-                            println!("date: {} now: {}", date, now);
-                            now < date
-                        } else {false}
+                if let Ok(res) = acceptance_date {
+                    let date = res.with_timezone(&Utc);
+                    let now = Utc::now();
+                    println!("date: {} now: {}", date, now);
+                    return now < date
                 }
-                None => false
             }
+            false
         }
 
         pub fn get_individ_property(&self, json: serde_json::Value, property_name: String) -> Option<String> {
-            match json.get(property_name) {
-                Some(date_bundle) => {
-                    match date_bundle.get(0) {
-                        Some(date_obj) => {
-                            date_obj.get("data").map(|date| {
-                                format!("{}", date.as_str().unwrap())
-                            })
-                        }
-                        None => None
+            if let Some(data_bundle) = json.get(property_name) {
+                if let Some(data_obj) = data_bundle.get(0) {
+                    if let Some(data) = data_obj.get("data") {
+                        return Some( data.as_str().unwrap_or("").to_string())
                     }
                 }
-                None => None
             }
+            None
         }
 
         pub fn get_date_when_acceptance_expiers(&self) -> String {
             let now = Utc::now();
-            let mounths = Months::new(3);
-            match now.checked_add_months(mounths) {
-                Some(date) => {
-                    date.format("%Y-%m-%dT%H:%M:%SZ").to_string()
-                }
-                None => String::default()
+            let months = Months::new(3);
+            if let Some(date) = now.checked_add_months(months) {
+                return date.format("%Y-%m-%dT%H:%M:%SZ").to_string()
             }
+            "".to_string()
         }
     }
 }
