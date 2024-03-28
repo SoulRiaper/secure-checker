@@ -3,8 +3,8 @@ pub mod storage {
     use std::{fs::{self, File}, io::{Read, Write}};
     use serde_json::Value;
 
-    pub fn get_user_stored_info(username: String) -> Result<Value, ()> {
-        match File::open(username) {
+    pub fn get_user_stored_info(filename: String) -> Result<Value, ()> {
+        match File::open(filename) {
             Ok(mut file) => {
                 let mut json = String::new();
                 file.read_to_string(&mut json).ok().unwrap();
@@ -20,8 +20,8 @@ pub mod storage {
         }
     }
 
-    pub fn write_user_info_localy(json: Value, username:String) -> Result<(), String> {
-        match File::create(username) {
+    pub fn write_user_info_localy(json: Value, filename:String) -> Result<(), String> {
+        match File::create(filename) {
             Ok(mut file) => {
                 match file.write_all(json.to_string().as_bytes()){
                     Ok(_) => Ok(()),
@@ -32,11 +32,11 @@ pub mod storage {
         }
     }
 
-    pub fn is_acceptance_info_stored(username: String) -> bool {
-        File::open(username).is_ok()
+    pub fn is_acceptance_info_stored(filename: String) -> bool {
+        File::open(filename).is_ok()
     }
 
-    pub fn remove_acceptance_local_info(username: String) {
-        fs::remove_file(username).unwrap_or_default();
+    pub fn remove_acceptance_local_info(filename: String) {
+        fs::remove_file(filename).unwrap_or_default();
     }
 }

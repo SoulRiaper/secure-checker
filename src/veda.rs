@@ -5,6 +5,8 @@ pub mod veda_client {
     use chrono::{DateTime, Months};
     use chrono::offset::Utc;
     use serde_json::Value;
+    use ring::digest;
+    use base58::ToBase58;
 
     pub struct VedaClient {
         auth_ticket : String,
@@ -70,7 +72,7 @@ pub mod veda_client {
         }
 
         pub fn get_acceptance_obj(&self, username: String, date: String) -> Value {
-            let acceptance_uri = format!("d:{}{}", username, self.uri_addition);
+            let acceptance_uri = self.get_uri_by_username(username.clone());
             serde_json::json!({
                 "@": acceptance_uri,
                 "rdf:type":[{"data":"v-s:SecurityPolicy", "type" : "Uri"}],
@@ -90,7 +92,7 @@ pub mod veda_client {
         }
 
         pub fn get_user_policy_acceptance(&self, username: String) -> Result<serde_json::Value, String> {
-            let acceptance_uri = format!("d:{}{}", username, self.uri_addition);
+            let acceptance_uri = self.get_uri_by_username(username);
             match self.get_individual_by_uri(&acceptance_uri) {
                 Ok(json) => Ok(json),
                 Err(err) => Err(err)
@@ -130,6 +132,16 @@ pub mod veda_client {
                 return date.format("%Y-%m-%dT%H:%M:%SZ").to_string()
             }
             "".to_string()
+        }
+
+        pub fn get_username_hash(&self, username: String) -> String {
+            let username_hash = digest::digest(&digest::SHA256, username.as_bytes());
+            ToBase58::to_base58(username_hash.as_ref())
+        }
+
+        pub fn  get_uri_by_username(&self, username: String) -> String {
+            let username_hash = self.get_username_hash(username);
+            format!("d:{}{}", username_hash, self.uri_addition)
         }
     }
 }

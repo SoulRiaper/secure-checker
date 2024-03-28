@@ -11,18 +11,28 @@ use web_view::*;
 use clap::{arg, command, ArgAction};
 use local_storage::storage::*;
 use system_shutdown::logout;
+use url::Url;
 
 fn main() {
 
     let matches = command!()
-        .arg(arg!(-u --base_uri <VALUE>).required(true).action(ArgAction::Set))
+        .arg(arg!(-u --base_url <VALUE>).action(ArgAction::Set))
         .get_matches();
     
-    let base_uri = matches.get_one::<String>("base_uri").expect("required");
+    let default_url = "http://username:password@example.com".to_string();
+    let base_url = matches.get_one::<String>("base_url").unwrap_or(&default_url);
+    let url = Url::parse(base_url).expect("Unable to parse url!");
+    let login = url.username();
+    let pass  = url.password().unwrap_or("");
+    let clean_url = format!("{}://{}{}",
+        url.scheme(),
+        url.host_str().unwrap_or(""),
+        if let Some(port) = url.port() { format!(":{}", port) } else { String::new() },
+    );
+    println!("url: {}. pass: {}. login: {}.", clean_url, pass, login);
 
-    let mut client: VedaClient = VedaClient::new(base_uri.clone());
-    let login = "vedadmin";
-    let pass  = "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3";
+    let mut client: VedaClient = VedaClient::new(clean_url);
+    
     let mut is_veda_available = false;
 
     match client.authenticate(login, pass) {
@@ -31,7 +41,7 @@ fn main() {
             is_veda_available = true;
         }
         Err(_) => {
-            println!("Failed to authenticate, Try to store acceptance locally");
+            println!("Failed to authenticate, Try to get acceptance locally or get new");
         }
     };
 
@@ -46,9 +56,9 @@ fn main() {
                 println!("Acceptance OK");
                 return
             } else {
-                if is_acceptance_info_stored(username.clone()) {
+                if is_acceptance_info_stored(client.get_username_hash(username.clone())) {
                     println!("Found local accetance, try to load");
-                    if let Ok(json) = get_user_stored_info(username.clone()) {
+                    if let Ok(json) = get_user_stored_info(client.get_username_hash(username.clone())) {
                         if client.is_acceptance_valid(json.clone()) {
                         //TODO : Add local acceptance to veda
                         println!("Put local acceptance to veda");
@@ -59,7 +69,7 @@ fn main() {
             }
         }
         Err(_) => {
-            if let Ok(res) = get_user_stored_info(username.clone()) {
+            if let Ok(res) = get_user_stored_info(client.get_username_hash(username.clone())) {
                 if client.is_acceptance_valid(res.clone()) {
                     if is_veda_available {
                         client.put_acceptance_obj(res);
@@ -90,11 +100,10 @@ fn main() {
                     }
                 } else {
                     let acceptance_obj = client.get_acceptance_obj(username.clone(), client.get_date_when_acceptance_expiers());
-                    if write_user_info_localy(acceptance_obj, username.clone()).is_ok() {
+                    if write_user_info_localy(acceptance_obj, client.get_username_hash(username.clone())).is_ok() {
                         _webview.exit();
                     }
                 }
-                
             }
             "user_reject_policy" => {
                 println!("User reject policy"); 
