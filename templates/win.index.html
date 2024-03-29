@@ -358,10 +358,10 @@ mark,
 
     <script>
         function handleSubmit() {
-            window.webkit.messageHandlers.external.postMessage('user_accept_policy');
+            window.external.invoke('user_accept_policy');
         }
         function handleReject() {
-            window.webkit.messageHandlers.external.postMessage('user_reject_policy');
+            window.external.invoke('user_reject_policy');
         }
     </script>
 </body>

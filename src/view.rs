@@ -2,6 +2,15 @@ pub mod main_view {
 
     use askama::Template;
 
+    #[cfg(target_os = "windows")]
+    #[derive(Template)]
+    #[template(path = "win.index.html")]
+    struct MainTemplate {
+        user: String,
+        policy_text: String,
+    }
+
+    #[cfg(not(any(target_os = "windows")))]
     #[derive(Template)]
     #[template(path = "index.html")]
     struct MainTemplate {
