@@ -2,14 +2,15 @@
 
 mod view;
 mod veda;
-mod local_storage;
+mod util;
 
 use std::env;
 use view::main_view::render_main_view;
 use veda::veda_client::VedaClient;
 use web_view::*;
 use clap::{arg, command, ArgAction};
-use local_storage::storage::*;
+use util::local_storage::*;
+use util::user_util::*;
 use system_shutdown::logout;
 use url::Url;
 
@@ -56,9 +57,9 @@ fn main() {
                 println!("Acceptance OK");
                 return
             } else {
-                if is_acceptance_info_stored(client.get_username_hash(username.clone())) {
+                if is_acceptance_info_stored(get_username_hash(username.clone())) {
                     println!("Found local accetance, try to load");
-                    if let Ok(json) = get_user_stored_info(client.get_username_hash(username.clone())) {
+                    if let Ok(json) = get_user_stored_info(get_username_hash(username.clone())) {
                         if client.is_acceptance_valid(json.clone()) {
                         //TODO : Add local acceptance to veda
                         println!("Put local acceptance to veda");
@@ -69,7 +70,7 @@ fn main() {
             }
         }
         Err(_) => {
-            if let Ok(res) = get_user_stored_info(client.get_username_hash(username.clone())) {
+            if let Ok(res) = get_user_stored_info(get_username_hash(username.clone())) {
                 if client.is_acceptance_valid(res.clone()) {
                     if is_veda_available {
                         client.put_acceptance_obj(res);
@@ -95,12 +96,12 @@ fn main() {
         match _arg {
             "user_accept_policy" => {
                 if is_veda_available {
-                    if client.put_policy_acceptance_data(username.clone(), client.get_date_when_acceptance_expiers()).is_ok() {
+                    if client.put_policy_acceptance_data(username.clone(), get_date_when_acceptance_expiers()).is_ok() {
                        _webview.exit();
                     }
                 } else {
-                    let acceptance_obj = client.get_acceptance_obj(username.clone(), client.get_date_when_acceptance_expiers());
-                    if write_user_info_localy(acceptance_obj, client.get_username_hash(username.clone())).is_ok() {
+                    let acceptance_obj = client.get_acceptance_obj(username.clone(), get_date_when_acceptance_expiers());
+                    if write_user_info_localy(acceptance_obj, get_username_hash(username.clone())).is_ok() {
                         _webview.exit();
                     }
                 }

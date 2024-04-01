@@ -1,4 +1,26 @@
-pub mod storage {
+pub mod user_util {
+    
+    use ring::digest;
+    use base58::ToBase58;
+    use chrono::Months;
+    use chrono::offset::Utc;
+
+    pub fn get_username_hash(username: String) -> String {
+        let username_hash = digest::digest(&digest::SHA256, username.as_bytes());
+        ToBase58::to_base58(username_hash.as_ref())
+    }
+
+    pub fn get_date_when_acceptance_expiers() -> String {
+        let now = Utc::now();
+        let months = Months::new(3);
+        if let Some(date) = now.checked_add_months(months) {
+            return date.format("%Y-%m-%dT%H:%M:%SZ").to_string()
+        }
+        "".to_string()
+    }
+}
+
+pub mod local_storage {
 
     use std::{fs::{self, File}, io::{Read, Write}};
     use serde_json::Value;

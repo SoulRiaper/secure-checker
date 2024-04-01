@@ -1,12 +1,13 @@
 pub mod veda_client {
 
+    use crate::util::user_util::*;
+
     use openapi::apis::{configuration, default_api};
     use openapi::models::*;
-    use chrono::{DateTime, Months};
+    use chrono::DateTime;
     use chrono::offset::Utc;
     use serde_json::Value;
-    use ring::digest;
-    use base58::ToBase58;
+   
 
     pub struct VedaClient {
         auth_ticket : String,
@@ -125,23 +126,12 @@ pub mod veda_client {
             None
         }
 
-        pub fn get_date_when_acceptance_expiers(&self) -> String {
-            let now = Utc::now();
-            let months = Months::new(3);
-            if let Some(date) = now.checked_add_months(months) {
-                return date.format("%Y-%m-%dT%H:%M:%SZ").to_string()
-            }
-            "".to_string()
-        }
 
-        pub fn get_username_hash(&self, username: String) -> String {
-            let username_hash = digest::digest(&digest::SHA256, username.as_bytes());
-            ToBase58::to_base58(username_hash.as_ref())
-        }
 
         pub fn  get_uri_by_username(&self, username: String) -> String {
-            let username_hash = self.get_username_hash(username);
+            let username_hash = get_username_hash(username);
             format!("d:{}{}", username_hash, self.uri_addition)
         }
+        
     }
 }
