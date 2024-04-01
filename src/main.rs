@@ -30,7 +30,7 @@ fn main() {
         url.host_str().unwrap_or(""),
         if let Some(port) = url.port() { format!(":{}", port) } else { String::new() },
     );
-    println!("url: {}. pass: {}. login: {}.", clean_url, pass, login);
+    println!("url: {}. login: {}.", clean_url, login);
 
     let mut client: VedaClient = VedaClient::new(clean_url);
     
@@ -41,8 +41,8 @@ fn main() {
             println!("authentication ok");
             is_veda_available = true;
         }
-        Err(_) => {
-            println!("Failed to authenticate, Try to get acceptance locally or get new");
+        Err(err) => {
+            println!("Failed to authenticate, Try to get acceptance locally or get new, err= {:?}", err);
         }
     };
 
